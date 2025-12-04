@@ -7,7 +7,8 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body { padding: 20px; background: #f8f9fa; font-family: Arial, sans-serif; }
-    .day-header { font-weight: bold; background: #343a40; color: white; text-align: center; padding: 10px; }
+    .day-header { font-weight: bold; background: #343a40; color: white; text-align: center; padding: 10px; transition: background 0.2s; cursor: pointer; }
+    .day-header:hover { background: #8aff8a; color: #212529; }
     .time-label { background: #e9ecef; font-weight: bold; text-align: right; padding-right: 15px; vertical-align: middle !important; }
     .section-label { background: #d4edda; font-size: 1.1em; font-weight: bold; color: #155724; }
     .time-slot { min-height: 90px; border: 1px solid #ddd; padding: 6px; position: relative; cursor: pointer; transition: background 0.2s; }
@@ -20,7 +21,7 @@
     .closed { background: #6c757d; color: white; text-align: center; padding-top: 35px; font-size: 1.2em; }
     .today { background: #fff3cd !important; border: 3px solid #ffc107 !important; }
     #installBtn { display:none; margin-left:10px; }
-    #clock { position:fixed; top:10px; left:10px; font-size:20px; font-weight:bold; z-index:11000; }
+    #clock { position:fixed; top:20px; left:20px; font-size:20px; font-weight:bold; z-index:11000; }
     /* menu */
     #apptMenu { position:absolute; display:none; background:white; border:1px solid #ccc; padding:8px; border-radius:5px; z-index:12000; min-width:120px; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
     #apptMenu .menu-item { padding: 6px 10px; cursor: pointer; }
@@ -31,12 +32,12 @@
   <div id="clock"></div>
 
   <div class="container">
-      <h1 class="text-center mb-4 text-primary">Calendario de citas para reparación de automóviles</h1>
+      <h1 class="text-center mb-4 text-primary">Lunas Sevilla Agenda</h1>
 
       <div class="text-center mb-4" id="controlsRow">
           <button class="btn btn-outline-primary" id="prev">← Semana anterior</button>
           <button class="btn btn-primary mx-3" id="today">Hoy</button>
-          <button class="btn btn-outline-primary" id="next">La próxima semana →</button>
+          <button class="btn btn-outline-primary" id="next">Próxima semana →</button>
           <button class="btn btn-success ms-4" id="backup">Datos de copia de seguridad</button>
           <button class="btn btn-info" id="restoreBtn">Restaurar datos</button>
           <button class="btn btn-secondary" id="installBtn">Instalar aplicación</button>
@@ -61,48 +62,86 @@
   </div>
 
   <!-- Modal -->
-  <div class="modal fade" id="apptModal" tabindex="-1">
-      <div class="modal-dialog">
-          <div class="modal-content">
-              <div class="modal-header bg-primary text-white">
-                  <h5 class="modal-title">cita</h5>
-                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-              </div>
-              <div class="modal-body">
-                  <input type="hidden" id="editId">
-                  <div class="mb-3">
-                      <label class="form-label">Nombre del cliente *</label>
-                      <input type="text" class="form-control" id="name" placeholder="e.g. Fernando">
-                  </div>
-                  <div class="mb-3">
-                      <label class="form-label">Detalles del teléfono/automóvil</label>
-                      <input type="text" class="form-control" id="details"
-                             placeholder="e.g. 9865327845 | BMW 2025 ABC">
-                  </div>
-                  <div class="row">
-                      <div class="col-6">
-                          <label class="form-label">Hora de inicio *</label>
-                          <input type="time" class="form-control" id="start" required>
-                      </div>
-                      <div class="col-6">
-                          <label class="form-label">Hora de finalización *</label>
-                          <input type="time" class="form-control" id="end" required>
-                      </div>
-                  </div>
-                  <small class="text-muted">Duración predeterminada: 1 hora. Puedes cambiarla libremente.</small>
-              </div>
-              <div class="modal-footer">
-                  <button type="button" class="btn btn-danger" id="deleteBtn" style="display:none;">Borrar</button>
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                  <button type="button" class="btn btn-primary" id="saveBtn">Guardar cita</button>
-              </div>
+  <div class="modal fade" id="apptModal" tabindex="-1" aria-labelledby="apptModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"> <!-- modal-lg for better space -->
+      <div class="modal-content">
+
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="apptModalLabel">Nueva Cita</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <input type="hidden" id="editId">
+
+          <!-- Row 1: Name (full width) -->
+          <div class="mb-3">
+            <label class="form-label fw-bold">Nombre del cliente *</label>
+            <input type="text" class="form-control form-control-lg" id="name" placeholder="e.g. Fernando Salado">
           </div>
+
+          <div class="row g-3">
+            <!-- Row 2: Phone + Type -->
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Número de teléfono *</label>
+              <input type="text" class="form-control" id="phone" placeholder="e.g. 9865327845">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-bold">Tipo *</label>
+              <select class="form-select" id="type">
+                <option value="Tintado">Tintado</option>
+                <option value="Lunas">Lunas</option>
+                <option value="Pulido">Pulido de faro</option>
+              </select>
+            </div>
+
+            <!-- Row 3: Matrícula + Hora de pedido -->
+            <div class="col-md-6">
+              <label class="form-label">Matrícula</label>
+              <input type="text" class="form-control" id="matricula" placeholder="e.g. ABC 1234">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Hora de pedido</label>
+              <input type="text" class="form-control" id="orderTime" placeholder="e.g. 10:30">
+            </div>
+
+            <!-- Row 4: Confirmación + Pedido -->
+            <div class="col-md-6">
+              <label class="form-label">Confirmación</label>
+              <select class="form-select" id="confirmed">
+                <option value="Yes">Sí</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Pedido</label>
+              <select class="form-select" id="order">
+                <option value="Yes">Sí</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 5: Observations (full width) -->
+          <div class="mt-4">
+            <label class="form-label">Observaciones</label>
+            <textarea class="form-control" id="observations" rows="3" placeholder="Cualquier información adicional, notas del cliente, estado del vehículo, etc."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" id="deleteBtn" style="display:none;">Eliminar</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" id="saveBtn">Guardar</button>
+        </div>
+
       </div>
+    </div>
   </div>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="main_script.js"></script>
+  <script src="script_new.js"></script>
 
 </body>
 </html>
