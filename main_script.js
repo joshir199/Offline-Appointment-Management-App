@@ -140,6 +140,30 @@ function closeAlert() {
     document.getElementById("customAlert").style.display = "none";
 }
 
+function showAppointmentDetails(appt) {
+
+    const text = `
+      <strong>Detalles de la Cita</strong><br><br>
+
+      <strong>Nombre:</strong> ${escapeHtml(appt.name)} &nbsp;&nbsp;&nbsp;
+      <strong>Tel:</strong> ${escapeHtml(appt.phone)}<br><br>
+
+      <strong>Tipo:</strong> ${escapeHtml(appt.type)} &nbsp;&nbsp;&nbsp;
+      <strong>Hora:</strong> ${escapeHtml(appt.orderTime)} &nbsp;&nbsp;&nbsp;
+      <strong>Matrícula:</strong> ${escapeHtml(appt.matricula || '-')}<br><br>
+
+      <strong>Confirmación:</strong> ${escapeHtml(appt.confirmed || '')} &nbsp;&nbsp;&nbsp;
+      <strong>Perdido:</strong> ${escapeHtml(appt.order || '')}<br><br>
+
+      <strong>Observación:</strong><br>
+      ${escapeHtml(appt.observations || '-')}
+    `;
+
+    document.getElementById("alertText").innerHTML = text;
+    document.getElementById("customAlert").style.display = "block";
+}
+
+
 let monthAnchor = new Date(); // current shown month anchor
 function renderMonthView(anchorDate) {
     viewMode = 'month';
@@ -165,7 +189,7 @@ function renderMonthView(anchorDate) {
     const navHtml = `
       <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:8px;">
         <button id="monthPrev" class="btn btn-sm btn-outline-primary">← Mes anterior</button>
-        <strong>${monthAnchor.toLocaleString('default',{ month:'long', year:'numeric' })}</strong>
+        <strong>${monthAnchor.toLocaleString('es-ES', { month: 'long' , year:'numeric' })}</strong>
         <button id="monthNext" class="btn btn-sm btn-outline-primary">Mes siguiente →</button>
       </div>
     `;
@@ -225,7 +249,7 @@ function renderMonthView(anchorDate) {
                 // Optional: show number of appointments
                 //const count = byDate[date].length;
                 //cell.querySelector('.appt-box').textContent = count;
-                cell.querySelector('.appt-box').innerHTML = '🟡';
+                cell.querySelector('.appt-box').innerHTML = '📋🔔📋';
             }
 
             cell.onclick = async (e) => {
@@ -324,9 +348,9 @@ async function loadAppointments() {
 
             div.dataset.id = appt.id;
             div.innerHTML = `
-            <strong>${escapeHtml(appt.name)}</strong><br>
-            ${escapeHtml(appt.orderTime)} ${appt.matricula ? '· ' + escapeHtml(appt.matricula) : ''}<br>
-            <small>${escapeHtml(appt.type || '')} • ${escapeHtml(appt.phone || '')}</small>
+              <strong>${escapeHtml(appt.name)}</strong><br>
+              <small>${escapeHtml(appt.orderTime)} • ${escapeHtml(appt.type || '')}</small><br>
+              <small>${escapeHtml(appt.observations || '')}</small>
             `;
             div.onclick = e => { e.stopPropagation(); openApptMenu(e, appt.id); };
             cell.appendChild(div);
@@ -606,6 +630,11 @@ document.getElementById('apptMenu').addEventListener('click', async (ev) => {
     if (action === 'modify') {
         // call your editAppt function with the appt object
         editAppt(appt);
+        return;
+    }
+    if (action === 'view') {
+        // call your viewAppointment function with the appt object
+        showAppointmentDetails(appt);
         return;
     }
     // cancel -> nothing
