@@ -36,11 +36,11 @@ let currentMonday = getMonday(new Date());
 let viewMode = 'week'; // 'week' or 'month'
 let deferredInstallPrompt = null;
 
-function getMonday(d) {
-  d = new Date(d);
-  const day = d.getDay();
-  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-  return new Date(d.setDate(diff));
+function getMonday(d) { //get Monday of current week
+    d = new Date(d);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Monday
+    return new Date(d.setDate(diff));
 }
 function formatDate(d) { return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }); }
 function isToday(d) { return d.toDateString() === new Date().toDateString(); }
@@ -376,6 +376,25 @@ async function loadAppointments() {
 function scheduleReminders(appts) {
     appts.forEach(appt => {
         try {
+            // add reminders to save data every monday
+            if (new Date().getDay() === 1) {    // Monday = 1
+                // Its monday:
+                const btn = document.getElementById('backup');
+                const lastClick = localStorage.getItem('backupClickedThisWeek');
+                if (lastClick !== new Date().toDateString()) {
+                    btn.classList.add('monday-alert');     // vibrate + glow
+                } else {
+                    btn.classList.remove('monday-alert');  // calm down
+                }
+
+                // When user clicks → turn off the alert for this week
+                btn.onclick = async (ev) => {
+                    localStorage.setItem('backupClickedThisWeek', new Date().toDateString());
+                    btn.classList.remove('monday-alert');
+                    const data = await db.getAll();
+                    downloadJSON(data, `lunas_sevilla_data_backup-${new Date().toISOString().slice(0,10)}.json`);
+                };
+            }
             if (appt.status === 'red') return;
             if (!appt.orderTime) return;
             const [y,m,d] = appt.date.split('-');
@@ -696,7 +715,7 @@ document.getElementById('backup').onclick = async (ev) => {
             const d = new Date(a.date);
             return d >= start && d <= end;
         });
-        downloadJSON(data, `repairshop-week-${start.toISOString().slice(0,10)}.json`);
+        downloadJSON(data, `lunas_sevilla_data_semana-${start.toISOString().slice(0,10)}.json`);
         return;
     }
     if (ev.ctrlKey || ev.metaKey) {
@@ -705,11 +724,11 @@ document.getElementById('backup').onclick = async (ev) => {
             const d = new Date(a.date);
             return d.getFullYear() === y && d.getMonth() === m;
         });
-        downloadJSON(data, `repairshop-month-${y}-${String(m+1).padStart(2,'0')}.json`);
+        downloadJSON(data, `lunas_sevilla_data_mes-${y}-${String(m+1).padStart(2,'0')}.json`);
         return;
     }
     const data = await db.getAll();
-    downloadJSON(data, `repairshop-backup-${new Date().toISOString().slice(0,10)}.json`);
+    downloadJSON(data, `lunas_sevilla_data_backup-${new Date().toISOString().slice(0,10)}.json`);
 };
 
 document.getElementById('restoreBtn').onclick = () => document.getElementById('restore').click();

@@ -51,6 +51,41 @@
       .time-label { display:none; }
       .table { font-size:12px; }
     }
+
+    /* Glowing + pulsing effect every Monday until clicked */
+    #backup.monday-alert {
+        animation: pulseGlow 2s infinite, vibrate 0.5s infinite 2s;
+        position: relative;
+        z-index: 10;
+    }
+
+    #backup.monday-alert::after {
+        content: '';
+        position: absolute;
+        top: -4px; right: -4px;
+        width: 12px; height: 12px;
+        background: #ff3b30;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #ff3b30;
+        animation: blink 1.5s infinite;
+    }
+
+    /* Animations */
+    @keyframes pulseGlow {
+        0%, 100% { box-shadow: 0 0 5px #ff9500; }
+        50%      { box-shadow: 0 0 20px #ff9500; }
+    }
+
+    @keyframes vibrate {
+        0%, 100% { transform: translateX(0); }
+        25%      { transform: translateX(-3px); }
+        75%      { transform: translateX(3px); }
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: 0.4; }
+    }
   </style>
 </head>
 <body>
