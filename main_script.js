@@ -127,8 +127,8 @@ function renderCalendar() {
 function showStyledAlert(date, count) {
     const text = `
         Citas en ${date}<br>
-        <span style="color:#0090ff;">🔵 Tintado: ${count.blue}</span><br>
-        <span style="color:#0abf04;">🟢 Lunas: ${count.green}</span><br>
+        <span style="color:#0abf04;">🟢 Tintado: ${count.green}</span><br>
+        <span style="color:#0090ff;">🔵 Lunas: ${count.blue}</span><br>
         <span style="color:#e0c000;">🟡 Pulido: ${count.yellow}</span>
     `;
 
