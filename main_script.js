@@ -49,8 +49,14 @@ function isToday(d) { return d.toDateString() === new Date().toDateString(); }
  Utilities for color classes by type/status
  ======================= */
 function typeClassFor(appt) {
-    if (appt.status === 'completed' || appt.status === 'red') return 'completed';
     const t = (appt.type || '').toLowerCase();
+    // changed
+    if (appt.status === 'completed' || appt.status === 'red')
+    {
+        if (t.includes('tint')) return 'type-tintado';
+        if (t.includes('lunas')) return 'type-lunas';
+        if (t.includes('pulid')) return 'type-pulido';
+    }
     if (t.includes('tint')) return 'type-tintado';
     if (t.includes('lunas')) return 'type-lunas';
     if (t.includes('pulid')) return 'type-pulido';
@@ -432,9 +438,11 @@ function autoUpdateStatusFor(appt) {
     const start = new Date(y, m-1, d, sh, sm);
     const end = new Date(start.getTime() + 60*60*1000); // assume 1 hour
     const now = new Date();
+    /*
     if (now > end) appt.status = 'red';
     else if ((start - now) <= 60*60*1000) appt.status = 'yellow';
     else appt.status = 'green';
+    */
 }
 
 function escapeHtml(s) { return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
@@ -636,6 +644,7 @@ document.getElementById('apptMenu').addEventListener('click', async (ev) => {
         else renderMonthView(monthAnchor);
         return;
     }
+    /*
     if (action === 'completed') {
         appt.status = 'completed';
         appt.auto = false;
@@ -646,6 +655,7 @@ document.getElementById('apptMenu').addEventListener('click', async (ev) => {
         else renderMonthView(monthAnchor);
         return;
     }
+    */
     if (action === 'modify') {
         // call your editAppt function with the appt object
         editAppt(appt);
