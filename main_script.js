@@ -156,7 +156,7 @@ function showAppointmentDetails(appt) {
 
       <strong>Tipo:</strong> ${escapeHtml(appt.type)} &nbsp;&nbsp;&nbsp;
       <strong>Hora:</strong> ${escapeHtml(appt.orderTime)} &nbsp;&nbsp;&nbsp;
-      <strong>Matrícula:</strong> ${escapeHtml(appt.matricula || '-')}<br><br>
+      <strong>Vehículo:</strong> ${escapeHtml(appt.matricula || '-')}<br><br>
 
       <strong>Confirmación:</strong> ${escapeHtml(appt.confirmed || '')} &nbsp;&nbsp;&nbsp;
       <strong>Perdido:</strong> ${escapeHtml(appt.order || '')}<br><br>
