@@ -721,7 +721,7 @@ document.getElementById('apptMenu').addEventListener('click', async (ev) => {
     if (action === 'missed') {
         appt.status = 'missed';
         appt.missed = 1;
-        appt.observations = '🔴 Faltar a la Cita: ' + (appt.observations || '');
+        appt.observations = '🔴 [Faltó a la Cita]: ' + (appt.observations || '');
         await db.put(appt);
         //loadAppointments();
         if (viewMode === 'week') renderCalendar();
