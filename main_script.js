@@ -45,6 +45,25 @@ function getMonday(d) { //get Monday of current week
 function formatDate(d) { return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }); }
 function isToday(d) { return d.toDateString() === new Date().toDateString(); }
 
+function buildHeaderCounts(count) {
+    let html = '';
+    if (count.green > 0) {
+        html += `<span style="color:#0abf04;">🟢:${count.green}</span>&nbsp;`;
+    }
+    if (count.blue > 0) {
+        html += `<span style="color:#0090ff;">🔵:${count.blue}</span>&nbsp;`;
+    }
+    if (count.yellow > 0) {
+        html += `<span style="color:#e0c000;">🟡:${count.yellow}</span>`;
+    }
+    if (!html) { html = ' _ ';} // nothing to show
+    return `
+        <div style="font-size:18px; font-weight: bold; margin-top:5px; margin-right:30px line-height:1.5;">
+            ${html}
+        </div>
+    `;
+}
+
 /* =======================
  Utilities for color classes by type/status
  ======================= */
@@ -77,29 +96,45 @@ function renderCalendar() {
     thead.innerHTML = ''; tbody.innerHTML = '';
     document.getElementById('weekInfo').textContent = `Semana: ${formatDate(currentMonday)} – ${formatDate(new Date(currentMonday.getTime() + 6*24*60*60*1000))}`;
 
-    // Header row
-    let header = '<tr><th></th>';
-    for (let i = 0; i < 7; i++) {
-        const date = new Date(currentMonday);
-        date.setDate(date.getDate() + i);
-        const dateStr = date.toISOString().split('T')[0];
-        const isWeekend = date.getDay() % 6 === 0; // 0 = Sunday, 6 = Saturday
-        const cls = isToday(date)
-            ? 'today ' + (isWeekend ? 'day-header weekend' : 'day-header weekday')
-            : (isWeekend ? 'day-header weekend' : 'day-header weekday');
-        header += `<th class="${cls}" data-date="${dateStr}">${weekDays[date.getDay()]}<br>${date.getDate()}</th>`;
-    }
-    header += '</tr>';
-    thead.innerHTML = header;
+    (async () => {
+        const all = await db.getAll();
 
-    // Add click event to header cells
-    thead.querySelectorAll('th.day-header.weekday').forEach(th => {
-        th.addEventListener('click', () => {
-            const date = th.dataset.date;
-            // Open modal at default time (9:00) when header is clicked
-            openModal({ dataset: { date: date, time: '09:00' } });
+        // Header row
+        let header = '<tr><th></th>';
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(currentMonday);
+            date.setDate(date.getDate() + i);
+            const dateStr = date.toISOString().split('T')[0];
+            // Get appointment counts per day
+            const list = all.filter(a => a.date === dateStr);
+            // COUNT per type
+            let count = { green: 0, blue: 0, yellow: 0};
+            list.forEach(a => {
+                if (a.type === "Tintado") count.green++;
+                else if (a.type === "Lunas") count.blue++;
+                else if (a.type === "Pulido") count.yellow++;
+            });
+            //////////////////
+            const isWeekend = date.getDay() % 6 === 0; // 0 = Sunday, 6 = Saturday
+            const cls = isToday(date)
+                ? 'today ' + (isWeekend ? 'day-header weekend' : 'day-header weekday')
+                : (isWeekend ? 'day-header weekend' : 'day-header weekday');
+            header += `<th class="${cls}" data-date="${dateStr}">${weekDays[date.getDay()]}<br>${date.getDate()}<br>${buildHeaderCounts(count)}</th>`;
+        }
+        header += '</tr>';
+        thead.innerHTML = header;
+
+        // Add click event to header cells
+        thead.querySelectorAll('th.day-header.weekday').forEach(th => {
+            th.addEventListener('click', () => {
+                const date = th.dataset.date;
+                // Open modal at default time (9:00) when header is clicked
+                openModal({ dataset: { date: date, time: '09:00' } });
+            });
         });
-    });
+
+    })();
+
 
     const sections = [
         { label: "Mañana", start: 9, end: 12 },
@@ -130,6 +165,7 @@ function renderCalendar() {
  Month view rendering
  ======================= */
 
+/*
 function showStyledAlert(date, count) {
     const text = `
         Citas en ${date}<br>
@@ -141,6 +177,7 @@ function showStyledAlert(date, count) {
     document.getElementById("alertText").innerHTML = text;
     document.getElementById("customAlert").style.display = "block";
 }
+*/
 
 function closeAlert() {
     document.getElementById("customAlert").style.display = "none";
@@ -253,9 +290,23 @@ function renderMonthView(anchorDate) {
             if (byDate[date] && byDate[date].length > 0) {
                 cell.classList.add('has-appointment');  // Add special class
                 // Optional: show number of appointments
-                //const count = byDate[date].length;
-                //cell.querySelector('.appt-box').textContent = count;
-                cell.querySelector('.appt-box').innerHTML = '📋🔔📋';
+                const list = all.filter(a => a.date === date);
+
+                // COUNT per type
+                let count = { blue: 0, green: 0, yellow: 0};
+                list.forEach(a => {
+                    if (a.type === "Tintado") count.green++;
+                    else if (a.type === "Lunas") count.blue++;
+                    else if (a.type === "Pulido") count.yellow++;
+                });
+
+                const text = `
+                    <span style="color:#0abf04; font-weight: bold;">🟢 Tintado: ${count.green}</span><br>
+                    <span style="color:#0090ff; font-weight: bold;">🔵 Lunas: ${count.blue}</span><br>
+                    <span style="color:#E0A800; font-weight: bold;">🟡 Pulido: ${count.yellow}</span>
+                `;
+
+                cell.querySelector('.appt-box').innerHTML = text;
             }
 
             cell.onclick = async (e) => {
@@ -275,7 +326,6 @@ function renderMonthView(anchorDate) {
                 menu.style.left = (e.clientX + window.scrollX) + "px";
 
                 menu.innerHTML = `
-                    <div class="menu-item" data-act="view" style="padding:6px;cursor:pointer;">📊 Ver Citas</div>
                     <div class="menu-item" data-act="add"  style="padding:6px;cursor:pointer;">➕ Añadir Cita</div>
                     <div class="menu-item" data-act="cancel" style="padding:6px;cursor:pointer;">✖ Cancelar</div>
                 `;
@@ -294,7 +344,7 @@ function renderMonthView(anchorDate) {
                 menu.onclick = async (ev) => {
                     ev.stopPropagation();
                     const action = ev.target.dataset.act;
-
+                    /*
                     if (action === "view") {
                         const all = await db.getAll();
                         const list = all.filter(a => a.date === date);
@@ -302,12 +352,13 @@ function renderMonthView(anchorDate) {
                         // COUNT per type
                         let count = { blue: 0, green: 0, yellow: 0};
                         list.forEach(a => {
-                            if (a.type === "Tintado") count.blue++;
-                            else if (a.type === "Lunas") count.green++;
+                            if (a.type === "Tintado") count.green++;
+                            else if (a.type === "Lunas") count.blue++;
                             else if (a.type === "Pulido") count.yellow++;
                         });
                         showStyledAlert(date, count);
                     }
+                    */
 
                     if (action === "add") {
                         // openModal expects dataset.date and dataset.time
@@ -501,6 +552,7 @@ document.getElementById('saveBtn').onclick = async () => {
     const confirmed = document.getElementById('confirmed').value;
     const order = document.getElementById('order').value;
     const observations = document.getElementById('observations').value.trim();
+    const missed = 0;
 
     if (!name || !phone || !orderTime) {
         return alert("Por favor, complete todos los campos obligatorios.");
@@ -516,6 +568,7 @@ document.getElementById('saveBtn').onclick = async () => {
         confirmed,
         order,
         observations,
+        missed,
         status: id ? (window.currentAppt?.status || 'green') : 'green',
         auto: id ? (window.currentAppt?.auto ?? true) : true
     };
@@ -537,6 +590,26 @@ document.getElementById('saveBtn').onclick = async () => {
         msg += '\n¿Quieres sobrescribir y guardar de todas formas?';
         if (!confirm(msg)) return;
     }
+
+
+    // --- Check for previous "missed" appointments (no-show clients) ---
+    const previousMissed = all.filter(a =>
+        a.missed == 1 &&       // Missed flag is 1 (or true if boolean)
+        a.name.trim().toLowerCase() === appt.name.trim().toLowerCase() &&
+        a.phone.trim() === appt.phone.trim()
+    );
+
+    if (previousMissed.length > 0) {
+        let warningMsg = `⚠️ ATENCIÓN: Este cliente tiene ${previousMissed.length} cita(s) perdida(s) previa(s):\n\n`;
+        previousMissed.forEach(m => {
+            warningMsg += `• ${m.date} , Tipo: ${m.type}\n`;
+        });
+        warningMsg += `\n¿Deseas continuar y guardar la nueva cita de todas formas?`;
+        if (!confirm(warningMsg)) {
+            return; // Cancel save if user clicks "No"
+        }
+    }
+
 
     try {
         if (id) {
@@ -644,18 +717,18 @@ document.getElementById('apptMenu').addEventListener('click', async (ev) => {
         else renderMonthView(monthAnchor);
         return;
     }
-    /*
-    if (action === 'completed') {
-        appt.status = 'completed';
-        appt.auto = false;
-        appt.observations = (appt.observations || '') + (appt.observations && appt.observations.trim().length ? ' ' : '') + '(terminado)';
+
+    if (action === 'missed') {
+        appt.status = 'missed';
+        appt.missed = 1;
+        appt.observations = '🔴 Faltar a la Cita: ' + (appt.observations || '');
         await db.put(appt);
         //loadAppointments();
         if (viewMode === 'week') renderCalendar();
         else renderMonthView(monthAnchor);
         return;
     }
-    */
+
     if (action === 'modify') {
         // call your editAppt function with the appt object
         editAppt(appt);
