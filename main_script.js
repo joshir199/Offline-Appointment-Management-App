@@ -13,7 +13,7 @@ const db = {
   async init() {
     if (this.db) return;
     return new Promise((res, rej) => {
-      const req = indexedDB.open('LunasSevilla_v1', 2);
+      const req = indexedDB.open('LunasSevilla_v2', 2);
       req.onupgradeneeded = e => {
         const idb = e.target.result;
         if (!idb.objectStoreNames.contains('appts')) {
