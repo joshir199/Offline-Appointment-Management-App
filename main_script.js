@@ -271,10 +271,12 @@ function renderMonthView(anchorDate) {
 
     // hook prev/next
     document.getElementById('monthPrev').onclick = () => {
-        renderMonthView(new Date(year, month - 1, 1));
+        const prevMonth = new Date(Date.UTC(year, month - 1, 1));
+        renderMonthView(prevMonth);
     };
     document.getElementById('monthNext').onclick = () => {
-        renderMonthView(new Date(year, month + 1, 1));
+        const nextMonth = new Date(Date.UTC(year, month + 1, 1));
+        renderMonthView(nextMonth);
     };
 
     // render appts into month cells
