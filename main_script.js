@@ -212,27 +212,29 @@ function renderMonthView(anchorDate) {
     viewMode = 'month';
     document.getElementById('weekContainer').style.display = 'none';
     document.getElementById('monthView').style.display = 'block';
-    monthAnchor = anchorDate ? new Date(anchorDate) : new Date(currentMonday);
+    // Use UTC to avoid any local timezone shift
+    const now = new Date();
+    const anchor = anchorDate ? new Date(anchorDate) : new Date(currentMonday.getTime()); // copy timestamp
+    const year = anchor.getUTCFullYear ? anchor.getUTCFullYear() : anchor.getFullYear(); // safe
+    const month = anchor.getUTCMonth ? anchor.getUTCMonth() : anchor.getMonth();
+
+    // Use UTC for all date calculations in month view
+    const firstDay = new Date(Date.UTC(year, month, 1));
+    const lastDay = new Date(Date.UTC(year, month + 1, 0));
+
+    // Week starts on Monday
+    const startIndex = (firstDay.getUTCDay() + 6) % 7;
+    const totalCells = startIndex + lastDay.getUTCDate();
+    const rows = Math.ceil(totalCells / 7);
 
     const container = document.getElementById('monthView');
-    container.innerHTML = ''; // clear
-
-    const year = monthAnchor.getFullYear();
-    const month = monthAnchor.getMonth();
-
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
-    // week starts Monday => JS getDay: 1=Mon..0=Sun
-    // compute start index where Monday=0
-    const startIndex = (firstDay.getDay() + 6) % 7;
-    const totalCells = startIndex + lastDay.getDate();
-    const rows = Math.ceil(totalCells / 7);
+    container.innerHTML = '';
 
     // simple toolbar
     const navHtml = `
       <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:8px;">
         <button id="monthPrev" class="btn btn-sm btn-outline-primary">← Mes anterior</button>
-        <strong>${monthAnchor.toLocaleString('es-ES', { month: 'long' , year:'numeric' })}</strong>
+        <strong>${new Date(year, month).toLocaleString('es-ES', { month: 'long', year: 'numeric' })}</strong>
         <button id="monthNext" class="btn btn-sm btn-outline-primary">Mes siguiente →</button>
       </div>
     `;
@@ -247,14 +249,16 @@ function renderMonthView(anchorDate) {
     for (let r = 0; r < rows; r++) {
         html += '<tr>';
         for (let c = 0; c < 7; c++) {
-            const d = new Date(year, month, dayCounter);
-            const isCurrentMonth = d.getMonth() === month;
-            const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-            const dateKey = d.toISOString().split('T')[0];
-            const inactive = (isCurrentMonth && !isWeekend) ? '' : 'inactive';
+            const d = new Date(Date.UTC(year, month, dayCounter));
+            const isCurrentMonth = d.getUTCMonth() === month;
+            const isWeekend = d.getUTCDay() === 0 || d.getUTCDay() === 6;
+            const dateKey = d.toISOString().split('T')[0]; // Always YYYY-MM-DD in UTC
 
-            html += `<td class="month-cell ${inactive}" data-date="${dateKey}">
-                      <div class="day-number">${d.getDate()}</div>
+            const inactive = isCurrentMonth ? '' : 'inactive';
+            const weekendClass = isWeekend ? 'weekend' : '';
+
+            html += `<td class="month-cell ${inactive} ${weekendClass}" data-date="${dateKey}">
+                      <div class="day-number">${d.getUTCDate()}</div>
                       <div class="appt-box" data-date="${dateKey}"></div>
                     </td>`;
             dayCounter++;
@@ -267,10 +271,10 @@ function renderMonthView(anchorDate) {
 
     // hook prev/next
     document.getElementById('monthPrev').onclick = () => {
-        renderMonthView(new Date(year, month - 1, 1));
+        renderMonthView(new Date.UTC(year, month - 1, 1));
     };
     document.getElementById('monthNext').onclick = () => {
-        renderMonthView(new Date(year, month + 1, 1));
+        renderMonthView(new Date.UTC(year, month + 1, 1));
     };
 
     // render appts into month cells
@@ -289,8 +293,7 @@ function renderMonthView(anchorDate) {
             // Check if there are any appointments on this date
             if (byDate[date] && byDate[date].length > 0) {
                 cell.classList.add('has-appointment');  // Add special class
-                // Optional: show number of appointments
-                const list = all.filter(a => a.date === date);
+                const list = byDate[date];
 
                 // COUNT per type
                 let count = { blue: 0, green: 0, yellow: 0};
