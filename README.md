@@ -1,7 +1,7 @@
 # Offline Appointment Management App
 Managing the appointments for small business locally
 
-Welcome to **Ofline Apointment Management App** — your all-in-one digital assistant to manage car repair appointments effortlessly! Designed for repair shops, mechanics, and car service centers, this app makes scheduling, tracking, and reminding easy, fast, and reliable.
+Welcome to **Offline Appointment Management App** — your all-in-one digital assistant to manage car repair appointments effortlessly! Designed for repair shops, mechanics, and car service centers, this app makes scheduling, tracking, and reminding easy, fast, and reliable.
 
 ---
 
