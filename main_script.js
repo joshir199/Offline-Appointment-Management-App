@@ -232,11 +232,35 @@ function renderMonthView(anchorDate) {
 
     // simple toolbar
     const navHtml = `
-      <div style="display:flex;gap:8px;align-items:center;justify-content:center;margin-bottom:8px;">
-        <button id="monthPrev" class="btn btn-sm btn-outline-primary">← Mes anterior</button>
-        <strong>${new Date(year, month).toLocaleString('es-ES', { month: 'long', year: 'numeric' })}</strong>
-        <button id="monthNext" class="btn btn-sm btn-outline-primary">Mes siguiente →</button>
-      </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:12px; padding:0 10px; width:100%;">
+            <!-- Left spacer (invisible) to balance the layout -->
+            <div style="min-width:200px; visibility:hidden;"></div>
+
+            <!-- Center: Navigation buttons + month name (centered) -->
+            <div style="display:flex; gap:12px; align-items:center; flex:1; justify-content:center;">
+              <button id="monthPrev" class="btn btn-sm btn-outline-primary">← Mes anterior</button>
+              <strong style="font-size:1.1rem; white-space:nowrap;">${new Date(year, month).toLocaleString('es-ES', { month: 'long', year: 'numeric' })}</strong>
+              <button id="monthNext" class="btn btn-sm btn-outline-primary">Mes siguiente →</button>
+            </div>
+
+            <!-- Right: Count summary box -->
+            <div id="monthCountBox" style="
+              background:#f8f9fa;
+              border:2px solid #dee2e6;
+              border-radius:6px;
+              padding:6px 14px;
+              font-size:0.95rem;
+              font-weight:bold;
+              white-space:nowrap;
+              box-shadow:0 1px 3px rgba(0,0,0,0.1);
+              min-width:240px;
+              text-align:center;
+            ">
+              <span style="color:#0abf04;">🟢 Tintado: <span id="countTintado">0</span></span> &nbsp;|&nbsp;
+              <span style="color:#0090ff;">🔵 Lunas: <span id="countLunas">0</span></span> &nbsp;|&nbsp;
+              <span style="color:#e0ac00;">🟡 Pulido: <span id="countPulido">0</span>
+            </div>
+        </div>
     `;
     container.insertAdjacentHTML('beforeend', navHtml);
 
@@ -288,6 +312,10 @@ function renderMonthView(anchorDate) {
             if (!byDate[a.date]) byDate[a.date] = [];
             byDate[a.date].push(a);
         });
+
+        // Create counter
+        let monthlyOrderCount = { tintado: 0, lunas: 0, pulido: 0};
+
         // ADD POPUP MENU FOR MONTH CELLS
         document.querySelectorAll('.month-cell').forEach(cell => {
             const date = cell.dataset.date;
@@ -304,6 +332,9 @@ function renderMonthView(anchorDate) {
                     else if (a.type === "Lunas") count.blue++;
                     else if (a.type === "Pulido") count.yellow++;
                 });
+                monthlyOrderCount.tintado += count.green;
+                monthlyOrderCount.lunas += count.blue;
+                monthlyOrderCount.pulido += count.yellow;
 
                 const text = `
                     <span style="color:#0abf04; font-weight: bold;">🟢 Tintado: ${count.green}</span><br>
@@ -374,6 +405,10 @@ function renderMonthView(anchorDate) {
                 };
             };
         });
+
+        document.getElementById('countTintado').textContent = monthlyOrderCount.tintado;
+        document.getElementById('countLunas').textContent   = monthlyOrderCount.lunas;
+        document.getElementById('countPulido').textContent  = monthlyOrderCount.pulido;
     })();
 }
 
