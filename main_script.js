@@ -330,15 +330,18 @@ function renderMonthView(anchorDate) {
                 list.forEach(a => {
                     if (a.type === "Tintado") {
                         count.green++;
-                        if (a.missed === 0) monthlyOrderCount.tintado++;
+                        monthlyOrderCount.tintado++
+                        if (a.missed === 1) monthlyOrderCount.tintado--;
                     }
                     else if (a.type === "Lunas") {
                         count.blue++;
-                        if (a.missed === 0) monthlyOrderCount.lunas++;
+                        monthlyOrderCount.lunas++;
+                        if (a.missed === 1) monthlyOrderCount.lunas--;
                     }
                     else if (a.type === "Pulido") {
                         count.yellow++;
-                        if (a.missed === 0) monthlyOrderCount.pulido++;
+                        monthlyOrderCount.pulido++;
+                        if (a.missed === 1) monthlyOrderCount.pulido--;
                     }
                 });
 
