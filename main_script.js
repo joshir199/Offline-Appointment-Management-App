@@ -328,13 +328,19 @@ function renderMonthView(anchorDate) {
                 // COUNT per type
                 let count = { blue: 0, green: 0, yellow: 0};
                 list.forEach(a => {
-                    if (a.type === "Tintado") count.green++;
-                    else if (a.type === "Lunas") count.blue++;
-                    else if (a.type === "Pulido") count.yellow++;
+                    if (a.type === "Tintado") {
+                        count.green++;
+                        if (a.missed === 0) monthlyOrderCount.tintado++;
+                    }
+                    else if (a.type === "Lunas") {
+                        count.blue++;
+                        if (a.missed === 0) monthlyOrderCount.lunas++;
+                    }
+                    else if (a.type === "Pulido") {
+                        count.yellow++;
+                        if (a.missed === 0) monthlyOrderCount.pulido++;
+                    }
                 });
-                monthlyOrderCount.tintado += count.green;
-                monthlyOrderCount.lunas += count.blue;
-                monthlyOrderCount.pulido += count.yellow;
 
                 const text = `
                     <span style="color:#0abf04; font-weight: bold;">🟢 Tintado: ${count.green}</span><br>
