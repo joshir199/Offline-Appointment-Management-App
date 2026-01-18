@@ -1,7 +1,11 @@
 # Offline Appointment Management App
-Managing the appointments for small business locally
+Managing the appointments for small business locally, preserving data privacy and security.
 
-Welcome to **Offline Appointment Management App** — your all-in-one digital assistant to manage car repair appointments effortlessly! Designed for repair shops, mechanics, and car service centers, this app makes scheduling, tracking, and reminding easy, fast, and reliable.
+This app is an all-in-one digital assistant to manage car repair appointments effortlessly!
+  
+Especially designed for repair shops, mechanics, and car service centers, this app makes scheduling, tracking, and reminding easy, fast, and reliable.
+  
+Company using this service : **Sevilla Lunas**
 
 ---
 
@@ -10,33 +14,30 @@ Welcome to **Offline Appointment Management App** — your all-in-one digital as
 ### 1. **Weekly Calendar View**
 
 * View your entire week at a glance.
-* Organized by **Morning, Afternoon, and Evening** slots.
-* Closed days are clearly marked (e.g., Sunday is automatically “CLOSED”).
+* Organized by hourly slots.
+* Closed days are clearly marked (e.g., Saturday & Sunday is automatically “CLOSED”).
 
 ### 2. **Easy Appointment Booking**
 
 * Click on any time slot to add a new appointment.
-* Enter **Customer Name, Car Details, Phone Number, Start Time, and End Time**.
-* Set appointments quickly, with default 1-hour slots for convenience.
+* Enter **Customer Name, Car Details, Phone Number, Service type, Booking Time, and other general details**.
+* Set appointments quickly, with each **Service type** showing in different color for convenience.
 
 ### 3. **Edit, Modify & Delete Appointments**
 
-* Double-click or open an appointment to **modify details**.
-* Delete appointments with a single click.
+* Click on an appointment to **modify details**.
+* Modify or Delete appointments with a single click.
+* Mark the appointment as **Missed** if customer did not arrived on time.
 * All changes update in real-time and are saved automatically.
 
-### 4. **Color-Coded Status**
+### 4. **Color-Coded Status for distinguishing service types**
 
-* **Green:** Upcoming appointments.
-* **Yellow:** Appointment starting within 1 hour.
-* **Red:** Missed or overdue appointments.
-* **Completed:** Appointments marked as done.
+* **Green, Yellow and Blue** colors are used to show appointment of different service type.
 * The app automatically updates status based on current time.
 
 ### 5. **Conflict Detection**
 
-* The app warns you if two appointments overlap.
-* Avoid double-booking and plan your day efficiently.
+* The app warns you if missed appointments owners are booking again.
 
 ### 6. **Reminders & Notifications**
 
@@ -48,7 +49,6 @@ Welcome to **Offline Appointment Management App** — your all-in-one digital as
 
 * Backup all your appointments with one click.
 * Restore appointments from a backup anytime.
-* Export options include **weekly**, **monthly**, or **full backup**.
 
 ### 8. **Install as PWA (Progressive Web App)**
 
@@ -61,31 +61,29 @@ Welcome to **Offline Appointment Management App** — your all-in-one digital as
 * A live digital clock is displayed on the screen.
 * Helps you keep track of time while managing appointments.
 
-### 10. **User-Friendly Interface**
+### 10. **Monthly Appointment Details User-Interface**
+
+* Clean and colorful design for calender month showing number of appointments for each types on the day.
+* User can easily add appointment in monthly mode too.
+* This mode shows the analytics about number of successful appointments per service type on monthly basis.
+* Collective view of monthly business sales and services
+
+### 11. **User-Friendly Interface**
 
 * Clean and colorful design.
 * Intuitive layout for quick navigation.
-* Responsive and works on any device size.
+* Responsive and works on any Tablet or Laptop devices.
 
-### 11. **Context Menu for Quick Actions**
-
-* Right-click or tap on an appointment to:
-
-  * Mark **Completed**
-  * **Modify**
-  * **Delete**
-  * **Cancel**
-* Save time and perform actions directly from the calendar.
 
 ### 12. **Automatic Status Updates**
 
-* Appointment colors update automatically as time passes.
-* Green → Yellow → Red based on the start time.
+* Appointment update automatically when user mark it with **Missed**.
+* **Red dot** is shown on the details visible on the appointment card in weekly view.
 * Keeps your schedule accurate without manual effort.
 
 ### 13. **Safe & Local Storage**
 
-* All data is stored **locally in your browser** using IndexedDB.
+* All data is stored **locally in your system**.
 * No internet connection required.
 * Your data stays private and secure.
 
@@ -99,3 +97,4 @@ Welcome to **Offline Appointment Management App** — your all-in-one digital as
 
 Take control of your repair shop schedule today — **never miss an appointment again!**
 
+For more details, contact here : raushanjoshi199@gmail.com
