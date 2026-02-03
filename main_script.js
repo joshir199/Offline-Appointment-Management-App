@@ -316,6 +316,28 @@ function renderMonthView(anchorDate) {
         // Create counter
         let monthlyOrderCount = { tintado: 0, lunas: 0, pulido: 0};
 
+        // Second: Count only appointments in the current displayed month
+        all.forEach(a => {
+          const apptDate = new Date(a.date);
+          // Check if appointment belongs to the current month/year
+          if (apptDate.getFullYear() === year && apptDate.getMonth() === month) {
+            const type = (a.type || '').trim();
+
+            if (type === "Tintado") {
+              monthlyOrderCount.tintado++;
+              if (a.missed === 1) monthlyOrderCount.tintado--;
+            }
+            else if (type === "Lunas") {
+              monthlyOrderCount.lunas++;
+              if (a.missed === 1) monthlyOrderCount.lunas--;
+            }
+            else if (type === "Pulido") {
+              monthlyOrderCount.pulido++;
+              if (a.missed === 1) monthlyOrderCount.pulido--;
+            }
+          }
+        });
+
         // ADD POPUP MENU FOR MONTH CELLS
         document.querySelectorAll('.month-cell').forEach(cell => {
             const date = cell.dataset.date;
@@ -330,18 +352,10 @@ function renderMonthView(anchorDate) {
                 list.forEach(a => {
                     if (a.type === "Tintado") {
                         count.green++;
-                        monthlyOrderCount.tintado++
-                        if (a.missed === 1) monthlyOrderCount.tintado--;
-                    }
-                    else if (a.type === "Lunas") {
+                    } else if (a.type === "Lunas") {
                         count.blue++;
-                        monthlyOrderCount.lunas++;
-                        if (a.missed === 1) monthlyOrderCount.lunas--;
-                    }
-                    else if (a.type === "Pulido") {
+                    } else if (a.type === "Pulido") {
                         count.yellow++;
-                        monthlyOrderCount.pulido++;
-                        if (a.missed === 1) monthlyOrderCount.pulido--;
                     }
                 });
 
