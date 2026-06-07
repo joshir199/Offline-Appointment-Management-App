@@ -45,6 +45,11 @@ function getMonday(d) { //get Monday of current week
 function formatDate(d) { return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }); }
 function isToday(d) { return d.toDateString() === new Date().toDateString(); }
 
+// To close the Alert Window
+function closeAlert() {
+    document.getElementById("customAlert").style.display = "none";
+}
+
 function buildHeaderCounts(count) {
     let html = '';
     if (count.green > 0) {
@@ -164,24 +169,6 @@ function renderCalendar() {
 /* =======================
  Month view rendering
  ======================= */
-
-/*
-function showStyledAlert(date, count) {
-    const text = `
-        Citas en ${date}<br>
-        <span style="color:#0abf04;">🟢 Tintado: ${count.green}</span><br>
-        <span style="color:#0090ff;">🔵 Lunas: ${count.blue}</span><br>
-        <span style="color:#e0c000;">🟡 Pulido: ${count.yellow}</span>
-    `;
-
-    document.getElementById("alertText").innerHTML = text;
-    document.getElementById("customAlert").style.display = "block";
-}
-*/
-
-function closeAlert() {
-    document.getElementById("customAlert").style.display = "none";
-}
 
 function showAppointmentDetails(appt) {
 
@@ -890,7 +877,74 @@ document.getElementById('restore').onchange = async e => {
     alert('¡La copia de seguridad se restauró exitosamente!');
     if (viewMode === 'week') renderCalendar(); else renderMonthView(monthAnchor);
 };
+/////////////////////////////////////////////
+/* =======================
+   Search Appointment Feature
+   ======================= */
 
+document.getElementById('searchBtn').onclick = () => {
+  // Clear previous results
+  document.getElementById('searchPhone').value = '';
+  document.getElementById('searchResults').innerHTML = `
+    <div class="text-center text-muted py-4">
+      Ingrese el número de teléfono y haga clic en Buscar
+    </div>`;
+
+  new bootstrap.Modal(document.getElementById('searchModal')).show();
+};
+// Search on button click
+document.getElementById('searchOkBtn').onclick = async () => {
+  const phoneInput = document.getElementById('searchPhone').value.trim();
+  const resultsContainer = document.getElementById('searchResults');
+
+  if (!phoneInput) {
+    resultsContainer.innerHTML = `<div class="alert alert-warning">Por favor, introduzca un número de teléfono.</div>`;
+    return;
+  }
+
+  const all = await db.getAll();
+
+  // Filter by phone number (exact match after trimming)
+  const results = all.filter(appt =>
+    appt.phone && appt.phone.trim() === phoneInput
+  );
+
+  // Sort by date descending (most recent first)
+  results.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+  if (results.length === 0) {
+    resultsContainer.innerHTML = `
+      <div class="alert alert-info text-center">
+        No se encontraron citas para el número de teléfono <strong>${phoneInput}</strong>
+      </div>`;
+    return;
+  }
+
+  // Build results list
+  let html = `<h6 class="mb-3">Encontrado ${results.length} citas para <strong>${phoneInput}</strong></h6>`;
+
+  html += `<div class="list-group">`;
+
+  results.forEach(appt => {
+    html += `
+      <div class="list-group-item list-group-item-action">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <strong>${appt.date}</strong> • ${appt.orderTime}<br>
+            <span class="text-primary">${appt.name}</span>
+            <small class="text-muted"> | Vehículo: ${appt.matricula || '-'}</small>
+          </div>
+          <div class="text-end">
+            <span class="badge bg-info">${appt.type}</span><br>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  html += `</div>`;
+  resultsContainer.innerHTML = html;
+};
+/////////////////////////////////////////////////////////
 
 // initial call
 renderCalendar();

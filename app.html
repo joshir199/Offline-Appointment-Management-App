@@ -132,7 +132,7 @@
           <button class="btn btn-outline-primary" id="next">Próxima semana →</button>
           <button class="btn btn-success ms-3" id="backup">Copia seguridad</button>
           <button class="btn btn-info" id="restoreBtn">Restaurar</button>
-          <button class="btn btn-secondary" id="installBtn">Instalar App</button>
+          <button class="btn btn-secondary" id="searchBtn" style="background-color: #28a745;">🔍 Buscar Cita</button>
           <input type="file" id="restore" style="display:none;" accept=".json">
         </div>
 
@@ -188,7 +188,7 @@
             <!-- Row 2: Phone + Type -->
             <div class="col-md-6">
               <label class="form-label fw-bold">Número de teléfono *</label>
-              <input type="text" class="form-control" id="phone" placeholder="e.g. 9865327845">
+              <input type="text" class="form-control" id="phone" placeholder="e.g. 986532784">
             </div>
             <div class="col-md-6">
               <label class="form-label fw-bold">Tipo *</label>
@@ -243,8 +243,37 @@
     </div>
   </div>
 
+  <!-- Search Modal -->
+  <div class="modal fade" id="searchModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">🔍 Buscar Cita por Teléfono</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="input-group mb-3">
+            <input type="text" id="searchPhone" class="form-control" placeholder="Ingrese el número de teléfono (e.g. 986532784)" autocomplete="off">
+            <button class="btn btn-primary" id="searchOkBtn">Buscar</button>
+          </div>
+
+          <div id="searchResults" style="max-height: 400px; overflow-y: auto;">
+            <!-- Results will be populated here -->
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- <script src="db.js"></script>
+    <script src="appState.js"></script>
+    <script src="calendar.js"></script>-->
     <script src="main_script.js"></script>
 </body>
 </html>
