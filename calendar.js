@@ -101,7 +101,7 @@ function renderCalendar() {
 
 
     const sections = [
-        { label: "Mañana", start: 9, end: 12 },
+        { label: "Mañana", start: 8, end: 12 },
         { label: "Mediodía", start: 12, end: 15 },
         { label: "Tarde", start: 15, end: 18 }
     ];
