@@ -85,6 +85,7 @@ window.openModal = function(el) {
     document.getElementById('orderTime').value = `${hour.toString().padStart(2,'0')}:00`;
     document.getElementById('confirmed').value = 'No';
     document.getElementById('order').value = 'No';
+    document.getElementById('orderDate').value = ds.date;
     const obsEl = document.getElementById('observations');
     if (obsEl) obsEl.value = '';
 
@@ -93,6 +94,7 @@ window.openModal = function(el) {
 };
 
 window.editAppt = function(appt) {
+    console.log("Edit Appointment !")
     document.getElementById('editId').value = appt.id;
     document.getElementById('name').value = appt.name || '';
     document.getElementById('observations').value = appt.observations || '';
@@ -103,6 +105,7 @@ window.editAppt = function(appt) {
     document.getElementById('confirmed').value = appt.confirmed || 'No';
     document.getElementById('order').value = appt.order || 'No';
     document.getElementById('deleteBtn').style.display = 'block';
+    document.getElementById('orderDate').value = appt.date || '';
     window.currentDate = appt.date;
     window.currentAppt = Object.assign({}, appt);
     bootstrap.Modal.getOrCreateInstance(document.getElementById('apptModal')).show();
@@ -112,6 +115,7 @@ window.editAppt = function(appt) {
    Save / Delete (with conflict detection)
    ======================= */
 document.getElementById('saveBtn').onclick = async () => {
+    console.log(" Save button click !")
     const id = document.getElementById('editId').value;
     const name = document.getElementById('name').value.trim();
     const phone = document.getElementById('phone').value.trim();
@@ -122,13 +126,16 @@ document.getElementById('saveBtn').onclick = async () => {
     const order = document.getElementById('order').value;
     const observations = document.getElementById('observations').value.trim();
     const missed = 0;
+    const apptDate = document.getElementById('orderDate').value.trim();
+    console.log("OrderDate: ", apptDate)
+    console.log("CurrentDate: ", window.currentDate)
 
     if (!name || !phone || !orderTime) {
         return alert("Por favor, complete todos los campos obligatorios.");
     }
 
     const appt = {
-        date: window.currentDate,
+        date: apptDate,
         name,
         phone,
         type,

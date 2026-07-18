@@ -564,6 +564,7 @@ window.openModal = function(el) {
     document.getElementById('matricula').value = '';
     document.getElementById('orderTime').value = `${hour.toString().padStart(2,'0')}:00`;
     document.getElementById('confirmed').value = 'No';
+    document.getElementById('orderDate').value = ds.date;
     document.getElementById('order').value = 'No';
     const obsEl = document.getElementById('observations');
     if (obsEl) obsEl.value = '';
@@ -583,6 +584,7 @@ window.editAppt = function(appt) {
     document.getElementById('confirmed').value = appt.confirmed || 'No';
     document.getElementById('order').value = appt.order || 'No';
     document.getElementById('deleteBtn').style.display = 'block';
+    document.getElementById('orderDate').value = appt.date || '';
     window.currentDate = appt.date;
     window.currentAppt = Object.assign({}, appt);
     bootstrap.Modal.getOrCreateInstance(document.getElementById('apptModal')).show();
@@ -602,6 +604,7 @@ document.getElementById('saveBtn').onclick = async () => {
     const confirmed = document.getElementById('confirmed').value;
     const order = document.getElementById('order').value;
     const observations = document.getElementById('observations').value.trim();
+    const apptDate = document.getElementById('orderDate').value.trim();
     const missed = 0;
 
     if (!name || !phone || !orderTime) {
@@ -609,7 +612,7 @@ document.getElementById('saveBtn').onclick = async () => {
     }
 
     const appt = {
-        date: window.currentDate,
+        date: apptDate,
         name,
         phone,
         type,
