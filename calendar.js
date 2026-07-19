@@ -32,12 +32,16 @@ function typeClassFor(appt) {
   return 'type-default';
 }
 
-function buildHeaderCounts(count) {
+function buildHeaderCounts(count, isHoliday) {
   let html = '';
-  if (count.green > 0) html += `<span style="color:#0abf04;">🟢:${count.green}</span>&nbsp;`;
-  if (count.blue > 0) html += `<span style="color:#0090ff;">🔵:${count.blue}</span>&nbsp;`;
-  if (count.yellow > 0) html += `<span style="color:#e0c000;">🟡:${count.yellow}</span>`;
-  if (!html) html = ' _ ';
+  if (isHoliday) {
+      html += '🎉 Festivo 🎉';
+  } else {
+      if (count.green > 0) html += `<span style="color:#0abf04;">🟢:${count.green}</span>&nbsp;`;
+      if (count.blue > 0) html += `<span style="color:#0090ff;">🔵:${count.blue}</span>&nbsp;`;
+      if (count.yellow > 0) html += `<span style="color:#e0c000;">🟡:${count.yellow}</span>`;
+      if (!html) html = ' _ ';
+  }
   return `<div style="font-size:18px; font-weight: bold; margin-top:5px; margin-right:30px; line-height:1.5;">${html}</div>`;
 }
 
@@ -62,6 +66,7 @@ function renderCalendar() {
 
     (async () => {
         const all = await db.getAll();
+        const holidaySet = new Set(all.filter(a => a.isHoliday).map(a => a.date));
 
         // Header row
         let header = '<tr><th></th>';
@@ -69,6 +74,7 @@ function renderCalendar() {
             const date = new Date(AppState.currentMonday);
             date.setDate(date.getDate() + i);
             const dateStr = date.toISOString().split('T')[0];
+            const isHoliday = holidaySet.has(dateStr);   // check holiday date
             // Get appointment counts per day
             const list = all.filter(a => a.date === dateStr);
             // COUNT per type
@@ -83,7 +89,7 @@ function renderCalendar() {
             const cls = isToday(date)
                 ? 'today ' + (isWeekend ? 'day-header weekend' : 'day-header weekday')
                 : (isWeekend ? 'day-header weekend' : 'day-header weekday');
-            header += `<th class="${cls}" data-date="${dateStr}">${weekDays[date.getDay()]}<br>${date.getDate()}<br>${buildHeaderCounts(count)}</th>`;
+            header += `<th class="${cls}" data-date="${dateStr}">${weekDays[date.getDay()]}<br>${date.getDate()}<br>${buildHeaderCounts(count, isHoliday)}</th>`;
         }
         header += '</tr>';
         thead.innerHTML = header;
@@ -93,36 +99,48 @@ function renderCalendar() {
             th.addEventListener('click', () => {
                 const date = th.dataset.date;
                 // Open modal at default time (9:00) when header is clicked
-                openModal({ dataset: { date: date, time: '09:00' } });
+                if (!holidaySet.has(date)) {
+                    openModal({ dataset: { date: date, time: '09:00' } });
+                }
             });
         });
 
-    })();
 
 
-    const sections = [
-        { label: "Mañana", start: 8, end: 12 },
-        { label: "Mediodía", start: 12, end: 15 },
-        { label: "Tarde", start: 15, end: 18 }
-    ];
+        const sections = [
+            { label: "Mañana", start: 8, end: 12 },
+            { label: "Mediodía", start: 12, end: 15 },
+            { label: "Tarde", start: 15, end: 18 }
+        ];
 
-    sections.forEach(sec => {
-        // Time rows
-        for (let h = sec.start; h < (sec.end === 18 ? 18 : sec.end); h++) {
-            let tr = `<tr><td class="time-label">${h}:00 – ${h+1}:00</td>`;
-            for (let d = 0; d < 7; d++) {
-                const date = new Date(AppState.currentMonday); date.setDate(date.getDate() + d);
-                if (date.getDay() % 6 === 0) { tr += '<td class="closed">CERRADO</td>'; continue; } // closed on Saturday & sunday
-                const dateStr = date.toISOString().split('T')[0];
-                const timeStr = `${h.toString().padStart(2,'0')}:00`;
-                tr += `<td class="time-slot" data-date="${dateStr}" data-time="${timeStr}" onclick="openModal(this)"></td>`;
+        //sections.forEach(sec => {
+        for (const sec of sections) {
+            // Time rows
+            for (let h = sec.start; h < (sec.end === 18 ? 18 : sec.end); h++) {
+                let tr = `<tr><td class="time-label">${h}:00 – ${h+1}:00</td>`;
+                for (let d = 0; d < 7; d++) {
+                    const date = new Date(AppState.currentMonday);
+                    date.setDate(date.getDate() + d);
+                    const dateStr = date.toISOString().split('T')[0];
+                    const isholiday = holidaySet.has(dateStr);  // check holiday date
+                    if (date.getDay() % 6 === 0 || isholiday) { tr += '<td class="closed">CERRADO</td>'; continue; } // closed on Saturday & sunday
+
+                    const timeStr = `${h.toString().padStart(2,'0')}:00`;
+                    tr += `<td class="time-slot" data-date="${dateStr}" data-time="${timeStr}" onclick="openModal(this)"></td>`;
+                }
+                tr += '</tr>';
+                tbody.innerHTML += tr;
             }
-            tr += '</tr>';
-            tbody.innerHTML += tr;
         }
-    });
 
-    loadAppointments();
+
+        loadAppointments();
+    })();
+}
+
+async function isHolidayDay(dateStr) {
+  const all = await db.getAll();
+  return all.some(a => a.date === dateStr && (a.isHoliday ?? false));
 }
 
 /* =======================
@@ -259,8 +277,10 @@ function renderMonthView(anchorDate) {
         });
 
         // ADD POPUP MENU FOR MONTH CELLS
-        document.querySelectorAll('.month-cell').forEach(cell => {
+        document.querySelectorAll('.month-cell').forEach(async cell => {
             const date = cell.dataset.date;
+
+            const holiday = await isHolidayDay(date)
 
             // Check if there are any appointments on this date
             if (byDate[date] && byDate[date].length > 0) {
@@ -284,8 +304,7 @@ function renderMonthView(anchorDate) {
                     <span style="color:#0090ff; font-weight: bold;">🔵 Lunas: ${count.blue}</span><br>
                     <span style="color:#E0A800; font-weight: bold;">🟡 Pulido: ${count.yellow}</span>
                 `;
-
-                cell.querySelector('.appt-box').innerHTML = text;
+                cell.querySelector('.appt-box').innerHTML = holiday ? "🎉 Festivo" : text;
             }
 
             cell.onclick = async (e) => {
@@ -306,6 +325,7 @@ function renderMonthView(anchorDate) {
 
                 menu.innerHTML = `
                     <div class="menu-item" data-act="add"  style="padding:6px;cursor:pointer;">➕ Añadir Cita</div>
+                    <div class="menu-item" data-act="holiday" style="padding:8px;cursor:pointer;">${holiday ? "🎉 Quitar festivo" : "🎉 Marcar como festivo"}</div>
                     <div class="menu-item" data-act="cancel" style="padding:6px;cursor:pointer;">✖ Cancelar</div>
                 `;
                 document.body.appendChild(menu);
@@ -341,7 +361,11 @@ function renderMonthView(anchorDate) {
 
                     if (action === "add") {
                         // openModal expects dataset.date and dataset.time
-                        openModal({ dataset: { date, time: "09:00" }});
+                        if (!holiday) {
+                            openModal({ dataset: { date, time: "09:00" }});
+                        }
+                    } else if (action === "holiday") {
+                        await markAsHoliday(date);
                     }
 
                     menu.remove();
@@ -354,6 +378,61 @@ function renderMonthView(anchorDate) {
         document.getElementById('countPulido').textContent  = monthlyOrderCount.pulido;
     })();
 }
+
+// Mark / Unmark a day as Holiday
+async function markAsHoliday(dateStr) {
+
+    const all = await db.getAll();
+    // All records for this date
+    const dayRecords = all.filter(a => a.date === dateStr);
+    // 1. Already marked as holiday -> change back to normal day
+    const holidayRecord = dayRecords.find(a => a.isHoliday === true);
+
+    if (holidayRecord) {
+        alert(
+            "Este día ya está marcado como festivo.\n" +
+            "Se cambiará nuevamente a día normal."
+        );
+        holidayRecord.isHoliday = false;
+        console.log("Update the holiday item and refresh the view")
+        await db.delete(holidayRecord.id);
+        renderMonthView(AppState.monthAnchor);
+        return;
+    }
+
+    // 2. Check if normal appointments exist
+    const normalAppointments = dayRecords.filter(a => !a.isHoliday);
+    console.log(normalAppointments.length)
+    if (normalAppointments.length > 0) {
+        alert(
+            "⚠️ Este día tiene citas programadas.\n\n" +
+            "Mueva primero las citas antes de marcarlo como festivo."
+        );
+        return;
+    }
+
+    // 3. No appointments -> create holiday record
+    const holiday = {
+        date: dateStr,
+        name: "",
+        phone: "",
+        type: "",
+        matricula: "",
+        orderTime: "",
+        confirmed: "",
+        order: "",
+        observations: "Festivo",
+        missed: 0,
+        isHoliday: true,
+        status: "",
+        auto: false
+    };
+
+    await db.add(holiday);
+    alert("Día marcado como festivo correctamente.");
+    renderMonthView(AppState.monthAnchor);
+}
+
 
 /* =======================
    Load & render appointments
@@ -369,6 +448,9 @@ async function loadAppointments() {
     document.querySelectorAll('.time-slot').forEach(slot => slot.innerHTML = '');
 
     appts.forEach(appt => {
+
+        //const isHoliday = appt.isHoliday ?? false;
+        //if (appt.isHoliday) return; // Skip holidays
         // keep auto-update active
         autoUpdateStatusFor(appt);
 

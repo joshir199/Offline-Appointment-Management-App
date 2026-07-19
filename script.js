@@ -126,6 +126,7 @@ document.getElementById('saveBtn').onclick = async () => {
     const order = document.getElementById('order').value;
     const observations = document.getElementById('observations').value.trim();
     const missed = 0;
+    const isHoliday = false;
     const apptDate = document.getElementById('orderDate').value.trim();
     console.log("OrderDate: ", apptDate)
     console.log("CurrentDate: ", window.currentDate)
@@ -145,6 +146,7 @@ document.getElementById('saveBtn').onclick = async () => {
         order,
         observations,
         missed,
+        isHoliday,
         status: id ? (window.currentAppt?.status || 'green') : 'green',
         auto: id ? (window.currentAppt?.auto ?? true) : true
     };
