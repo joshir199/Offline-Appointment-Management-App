@@ -290,7 +290,7 @@ function renderMonthView(anchorDate) {
 
             cell.onclick = async (e) => {
                 e.stopPropagation();
-                if (cell.classList.contains('inactive')) return;
+                if (cell.classList.contains('inactive') || cell.classList.contains('weekend')) return;
 
                 const menu = document.createElement('div');
                 menu.className = "month-menu";
